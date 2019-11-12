@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { UrlTree } from '@angular/router';
 import * as RouterActions from './../../../core/@ngrx/router/router.actions';
 
 // rxjs
-import { Observable, of, Subscription } from 'rxjs';
-import { pluck, switchMap } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
+import { pluck } from 'rxjs/operators';
 
 import {
   AutoUnsubscribe,
@@ -15,8 +15,13 @@ import { UserModel, User  } from './../../models/user.model';
 
 // @Ngrx
 import { Store, select } from '@ngrx/store';
-import { AppState, selectUsersOriginalUser, selectSelectedUserByUrl } from './../../../core/@ngrx';
-import * as UsersActions from './../../../core/@ngrx/users/users.actions';
+import { AppState } from './../../../core/@ngrx';
+
+import { selectSelectedUserByUrl } from 'src/app/core/@ngrx/data/entity-store.module';
+import { EntityCollectionService, EntityServices } from '@ngrx/data';
+import { NgForm } from '@angular/forms';
+
+
 
 @AutoUnsubscribe()
 @Component({
@@ -25,29 +30,40 @@ import * as UsersActions from './../../../core/@ngrx/users/users.actions';
 })
 
 export class UserFormComponent implements OnInit, CanComponentDeactivate {
+  @ViewChild('form', { static: false })
+  userForm: NgForm;
+  private userService: EntityCollectionService<User>;
+  private isSubmitClick = false;
+
   user: UserModel;
   private sub: Subscription;
+  
 
   constructor(
     private dialogService: DialogService,
-    private store: Store<AppState>
-  ) {}
+    private store: Store<AppState>,
+    entitytServices: EntityServices
+  ) {
+    // get service for the entity User
+    this.userService = entitytServices.getEntityCollectionService('User');
+  }
 
   ngOnInit(): void {
     // data is an observable object
     // which contains custom and resolve data
     this.sub = this.store.pipe(select(selectSelectedUserByUrl))
     .subscribe(user => this.user = {...user});
-
   }
 
   onSaveUser() {
     const user = { ...this.user } as User;
+    this.isSubmitClick = true;
     if (user.id) {
-      this.store.dispatch(UsersActions.updateUser({ user }));
+      this.userService.update(user);
     } else {
-      this.store.dispatch(UsersActions.createUser({ user }));
+      this.userService.add(user);
     }
+    this.onGoBack();
   }
 
   onGoBack() {
@@ -59,28 +75,16 @@ export class UserFormComponent implements OnInit, CanComponentDeactivate {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
-      const flags = [];
-
-      return this.store.pipe(
-        select(selectUsersOriginalUser),
-        switchMap(originalUser => {
-          for (const key in originalUser) {
-            if (originalUser[key] === this.user[key]) {
-              flags.push(true);
-            } else {
-              flags.push(false);
-            }
-          }
+      if (this.isSubmitClick) {
+        return true;
+     }
   
-          if (flags.every(el => el)) {
-            return of(true);
-          }
+     if (this.userForm.pristine) {
+        return true;
+     }
   
-          // Otherwise ask the user with the dialog service and return its
-          // promise which resolves to true or false when the user decides
-          return this.dialogService.confirm('Discard changes?');
-        })
-      );
-  
+     // Otherwise ask the user with the dialog service and return its
+     // promise which resolves to true or false when the user decides
+     return this.dialogService.confirm('Discard changes?');  
   }
 }

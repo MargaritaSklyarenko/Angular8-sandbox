@@ -10,7 +10,7 @@ import { TasksStoreModule } from './tasks/tasks-store.module';
 import { StoreRouterConnectingModule, RouterState } from '@ngrx/router-store';
 import { routerReducers, CustomSerializer, RouterEffects  } from './router';
 import { UsersStoreModule } from './users/users-store.module';
-
+import { EntityStoreModule } from './data/entity-store.module';
 @NgModule({
   declarations: [],
   // 2
@@ -38,7 +38,8 @@ import { UsersStoreModule } from './users/users-store.module';
     // Instrumentation must be imported after importing StoreModule (config is optional) 
     !environment.production ? StoreDevtoolsModule.instrument() : [],
     TasksStoreModule,
-    UsersStoreModule
+    UsersStoreModule,
+    EntityStoreModule
   ]
 })
 export class RootStoreModule { }

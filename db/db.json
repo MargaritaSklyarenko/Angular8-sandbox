@@ -37,7 +37,7 @@
       "estHours": 8
     }
   ],
-  "users": [
+  "user": [
     {
       "id": 1,
       "firstName": "Anna",
