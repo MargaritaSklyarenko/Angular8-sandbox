@@ -63,18 +63,6 @@ ngrxOnRunEffects(resolvedEffects$: Observable<EffectNotification>) {
     )
 );
 
-getTask$: Observable<Action> = createEffect(() =>
-    this.actions$.pipe(
-      ofType(TasksActions.getTask),
-      pluck('taskID'),
-      switchMap(taskID =>
-        this.taskPromiseService
-          .getTask(taskID)
-          .then(task => TasksActions.getTaskSuccess({ task }))
-          .catch(error => TasksActions.getTaskError({ error }))
-      )
-    )
-  );
 
 // 3
 updateTask$: Observable<Action> = createEffect(() =>

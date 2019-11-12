@@ -1,14 +1,14 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { Router } from '@angular/router';
 
 // rxjs
 // @NgRx
 import { Store, select } from '@ngrx/store';
-import { AppState, TasksState, selectSelectedTask   } from './../../../core/@ngrx';
+import { AppState, TasksState, selectSelectedTaskByUrl    } from './../../../core/@ngrx';
 import * as TasksActions from './../../../core/@ngrx/tasks/tasks.actions';
 
 // import { switchMap } from 'rxjs/operators';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 
@@ -24,16 +24,13 @@ export class TaskFormComponent implements OnInit, OnDestroy  {
 
   constructor(
     private router: Router,
-    private route: ActivatedRoute,
     private store: Store<AppState>
   ) {}
 
   ngOnInit(): void {
-   
-
     // it is not necessary to save subscription to route.paramMap
     // when router destroys this component, it handles subscriptions automatically
-    let observer = {
+    const  observer = {
       next: task => {
         if (task) {
           this.task = {...task} as TaskModel;
@@ -53,23 +50,10 @@ export class TaskFormComponent implements OnInit, OnDestroy  {
 
     this.store
       .pipe(
-        select(selectSelectedTask),
+        select(selectSelectedTaskByUrl),
         takeUntil(this.componentDestroyed$)
       )
       .subscribe(observer);
-
-    observer = {
-      ...observer,
-      next: (params: ParamMap) => {
-        const id = params.get('taskID');
-        if (id) {
-          this.store.dispatch(TasksActions.getTask({ taskID: +id }));
-        }
-      }
-    };
-
-    this.route.paramMap.subscribe(observer);
-
   }
 
   ngOnDestroy(): void {
