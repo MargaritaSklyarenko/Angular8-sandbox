@@ -6,7 +6,6 @@ import { UsersRoutingModule } from './users-routing.module';
 import { UsersServicesModule } from './users-services.module';
 
 import { UserComponent } from './components';
-import { UsersAPIProvider } from './users.config';
 
 @NgModule({
   imports: [
@@ -15,7 +14,6 @@ import { UsersAPIProvider } from './users.config';
     UsersRoutingModule,
     UsersServicesModule
   ],
-  providers: [UsersAPIProvider],
   declarations: [UsersRoutingModule.components, UserComponent]
 })
 export class UsersModule {}

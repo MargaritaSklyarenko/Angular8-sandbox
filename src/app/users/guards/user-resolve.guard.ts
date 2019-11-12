@@ -1,11 +1,15 @@
+// NgRx
+import { Store, select } from '@ngrx/store';
+import { AppState, selectSelectedUserByUrl } from './../../core/@ngrx';
+import * as UsersActions from './../../core/@ngrx/users/users.actions';
+
 import { Injectable } from '@angular/core';
-import { Router, Resolve, ActivatedRouteSnapshot } from '@angular/router';
+import { Router, Resolve } from '@angular/router';
 
 // rxjs
 import { Observable, of } from 'rxjs';
-import { delay, map, catchError, finalize, take } from 'rxjs/operators';
+import { delay, map, catchError, tap, finalize, take } from 'rxjs/operators';
 
-import { UserObservableService } from './../services';
 import { UserModel } from './../models/user.model';
 import { UsersServicesModule } from '../users-services.module';
 import { SpinnerService } from './../../widgets';
@@ -15,22 +19,18 @@ import { SpinnerService } from './../../widgets';
 })
 export class UserResolveGuard implements Resolve<UserModel> {
   constructor(
-    private userObservableService: UserObservableService,
     private router: Router,
-    private spinner: SpinnerService
+    private spinner: SpinnerService,
+    private store: Store<AppState>,
   ) {}
 
-  resolve(route: ActivatedRouteSnapshot): Observable<UserModel | null> {
+  resolve(): Observable<UserModel> | null {
     console.log('UserResolve Guard is called');
-
-    if (!route.paramMap.has('userID')) {
-      return of(new UserModel(null, '', ''));
-    }
-
     this.spinner.show();
-    const id = +route.paramMap.get('userID');
 
-    return this.userObservableService.getUser(id).pipe(
+    return this.store.pipe(
+      select(selectSelectedUserByUrl),
+      tap(user => this.store.dispatch(UsersActions.setOriginalUser({ user }))),
       delay(2000),
       map((user: UserModel) => {
         if (user) {
@@ -48,5 +48,6 @@ export class UserResolveGuard implements Resolve<UserModel> {
       }),
       finalize(() => this.spinner.hide())
     );
-  }
+  } 
+
 }

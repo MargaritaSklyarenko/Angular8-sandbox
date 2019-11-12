@@ -12,11 +12,8 @@ import { concatMap, catchError, retry } from 'rxjs/operators';
 
 import { UserModel } from './../models/user.model';
 import { UsersAPI } from './../users.config';
-import { UsersServicesModule } from '../users-services.module';
 
-@Injectable({
-  providedIn: UsersServicesModule
-})
+@Injectable()
 export class UserObservableService {
   constructor(
     private http: HttpClient,
