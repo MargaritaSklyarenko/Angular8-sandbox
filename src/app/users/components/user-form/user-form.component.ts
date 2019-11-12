@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, UrlTree } from '@angular/router';
+import { UrlTree } from '@angular/router';
 import * as RouterActions from './../../../core/@ngrx/router/router.actions';
 
 // rxjs
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subscription } from 'rxjs';
 import { pluck, switchMap } from 'rxjs/operators';
 
 import {
+  AutoUnsubscribe,
   DialogService,
   CanComponentDeactivate
 } from './../../../core';
@@ -14,10 +15,10 @@ import { UserModel, User  } from './../../models/user.model';
 
 // @Ngrx
 import { Store, select } from '@ngrx/store';
-import { AppState, selectUsersOriginalUser } from './../../../core/@ngrx';
+import { AppState, selectUsersOriginalUser, selectSelectedUserByUrl } from './../../../core/@ngrx';
 import * as UsersActions from './../../../core/@ngrx/users/users.actions';
 
-
+@AutoUnsubscribe()
 @Component({
   templateUrl: './user-form.component.html',
   styleUrls: ['./user-form.component.css']
@@ -25,9 +26,9 @@ import * as UsersActions from './../../../core/@ngrx/users/users.actions';
 
 export class UserFormComponent implements OnInit, CanComponentDeactivate {
   user: UserModel;
+  private sub: Subscription;
 
   constructor(
-    private route: ActivatedRoute,
     private dialogService: DialogService,
     private store: Store<AppState>
   ) {}
@@ -35,9 +36,9 @@ export class UserFormComponent implements OnInit, CanComponentDeactivate {
   ngOnInit(): void {
     // data is an observable object
     // which contains custom and resolve data
-    this.route.data.pipe(pluck('user')).subscribe((user: UserModel) => {
-      this.user = { ...user };
-    });
+    this.sub = this.store.pipe(select(selectSelectedUserByUrl))
+    .subscribe(user => this.user = {...user});
+
   }
 
   onSaveUser() {

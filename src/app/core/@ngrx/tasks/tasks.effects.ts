@@ -86,7 +86,6 @@ updateTask$: Observable<Action> = createEffect(() =>
       this.taskPromiseService
         .createTask(task)
         .then((createdTask: Task) => {
-          this.router.navigate(['/home']);
           return TasksActions.createTaskSuccess({ task: createdTask });
         })
         .catch(error => TasksActions.createTaskError({ error }))
@@ -109,6 +108,17 @@ deleteTask$: Observable<Action> = createEffect(() =>
       )
     )
   );
+  createUpdateTaskSuccess$: Observable<Action> = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(TasksActions.createTaskSuccess, TasksActions.updateTaskSuccess),
+      map(action =>
+        RouterActions.go({
+          path: ['/home']
+        })
+      )
+    );
+  });
+
 
 
 

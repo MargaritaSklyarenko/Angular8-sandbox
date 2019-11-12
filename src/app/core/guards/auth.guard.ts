@@ -1,3 +1,8 @@
+// @Ngrx
+import { Store } from '@ngrx/store';
+import { AppState } from './../@ngrx';
+import * as RouterActions from './../@ngrx/router/router.actions';
+
 import { Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
@@ -6,7 +11,6 @@ import {
   CanLoad,
   NavigationExtras,
   Route,
-  Router,
   RouterStateSnapshot,
   UrlTree,
   UrlSegment
@@ -19,7 +23,7 @@ import { AuthService } from '../services/auth.service';
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService) {}
 
   canActivate(
     next: ActivatedRouteSnapshot,
@@ -73,7 +77,6 @@ export class AuthGuard implements CanActivate, CanActivateChild, CanLoad {
     };
 
     // Navigate to the login page with extras
-    this.router.navigate(['/login'], navigationExtras);
     return false;
   }
 }
