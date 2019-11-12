@@ -1,11 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import * as RouterActions from './../../../core/@ngrx/router/router.actions';
 
-// rxjs
-// @NgRx
-import { Store, select } from '@ngrx/store';
-import { AppState, TasksState, selectSelectedTaskByUrl    } from './../../../core/@ngrx';
-import * as TasksActions from './../../../core/@ngrx/tasks/tasks.actions';
+import { TasksFacade } from 'src/app/core/@ngrx/tasks/tasks.facade';
 
 // import { switchMap } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -23,7 +18,7 @@ export class TaskFormComponent implements OnInit, OnDestroy  {
   private componentDestroyed$: Subject<void> = new Subject<void>();
 
   constructor(
-    private store: Store<AppState>
+    private tasksFacade: TasksFacade
   ) {}
 
   ngOnInit(): void {
@@ -47,9 +42,8 @@ export class TaskFormComponent implements OnInit, OnDestroy  {
       }
     };
 
-    this.store
+    this.tasksFacade.selectedTaskByUrl$
       .pipe(
-        select(selectSelectedTaskByUrl),
         takeUntil(this.componentDestroyed$)
       )
       .subscribe(observer);
@@ -64,18 +58,11 @@ export class TaskFormComponent implements OnInit, OnDestroy  {
   onSaveTask() {
     const task = { ...this.task } as TaskModel;
 
-    if (task.id) {
-      this.store.dispatch(TasksActions.updateTask({ task }));
-} else {
-      this.store.dispatch(TasksActions.createTask({ task }));
-}
-
+    const method = task.id ? 'updateTask' : 'createTask';
+    this.tasksFacade[method]({ task });
   }
 
   onGoBack(): void {
-    this.store.dispatch(RouterActions.go({
-      path: ['/home']
-    }));
-
+    this.tasksFacade.goTo({ path: ['/home'] });
   }
 }

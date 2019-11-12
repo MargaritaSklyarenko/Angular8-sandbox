@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import * as RouterActions from './../../../core/@ngrx/router/router.actions';
 
+import { EntityServices, EntityCollectionService } from '@ngrx/data';
+import { selectEditedUser } from './../../../core/@ngrx/data/entity-store.module';
+import { map } from 'rxjs/operators';
+
+
 // rxjs
 import { Observable, Subscription, of } from 'rxjs';
 import { UserModel, User  } from './../../models/user.model';
 import { Store, select } from '@ngrx/store';
-import * as UsersActions from './../../../core/@ngrx/users/users.actions';
-import { AppState, selectUsers, selectUsersError, selectEditedUser } from './../../../core/@ngrx';
+import { AppState } from './../../../core/@ngrx';
 import { AutoUnsubscribe } from './../../../core/decorators';
 @AutoUnsubscribe('subscription')
 @Component({
@@ -17,17 +21,26 @@ export class UserListComponent implements OnInit {
   users$: Observable<Array<UserModel>>;
   usersError$: Observable<Error | string>;
   private subscription: Subscription;
-  
+  private userService: EntityCollectionService<User>;
   private editedUser: UserModel;
 
   constructor(
-    private store: Store<AppState>
-  ) {}
+    private store: Store<AppState>,
+    entitytServices: EntityServices
+  ) {
+    // get service for the entity User
+    this.userService = entitytServices.getEntityCollectionService('User');
+  }
 
   ngOnInit() {
-    this.users$ = this.store.pipe(select(selectUsers));
-    this.usersError$ = this.store.pipe(select(selectUsersError));
-    this.store.dispatch(UsersActions.getUsers());
+    // use built-in selector
+    this.users$ = this.userService.entities$;
+
+    // use built-in selector with transformation
+    // error is in EntityAction
+    this.usersError$ = this.userService.errors$.pipe(
+      map(action => action.payload.data.error.error.message)
+    );
 
     this.subscription = this.store.pipe(select(selectEditedUser)).subscribe({
       next: user => {
@@ -56,7 +69,7 @@ export class UserListComponent implements OnInit {
 
   onDeleteUser(user: UserModel) {
     const userToDelete: User = { ...user };
-    this.store.dispatch(UsersActions.deleteUser({ user: userToDelete }));
-
+    // use service to dispatch EntitytAction
+    this.userService.delete(user.id);
   }
 }
