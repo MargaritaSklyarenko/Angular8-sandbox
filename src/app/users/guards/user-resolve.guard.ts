@@ -4,7 +4,9 @@ import { AppState, selectSelectedUserByUrl } from './../../core/@ngrx';
 import * as UsersActions from './../../core/@ngrx/users/users.actions';
 
 import { Injectable } from '@angular/core';
-import { Router, Resolve } from '@angular/router';
+import { Resolve } from '@angular/router';
+
+import * as RouterActions from './../../core/@ngrx/router/router.actions';
 
 // rxjs
 import { Observable, of } from 'rxjs';
@@ -19,7 +21,6 @@ import { SpinnerService } from './../../widgets';
 })
 export class UserResolveGuard implements Resolve<UserModel> {
   constructor(
-    private router: Router,
     private spinner: SpinnerService,
     private store: Store<AppState>,
   ) {}
@@ -36,13 +37,19 @@ export class UserResolveGuard implements Resolve<UserModel> {
         if (user) {
           return user;
         } else {
-          this.router.navigate(['/users']);
+          this.store.dispatch(RouterActions.go({
+            path: ['/users']
+          }));
+
           return null;
         }
       }),
       take(1),
       catchError(() => {
-        this.router.navigate(['/users']);
+        this.store.dispatch(RouterActions.go({
+          path: ['/users']
+        }));
+
         // catchError MUST return observable
         return of(null);
       }),

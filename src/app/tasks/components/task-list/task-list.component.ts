@@ -3,7 +3,7 @@ import { Store, select  } from '@ngrx/store';
 import { AppState, selectTasksData, selectTasksError   } from './../../../core/@ngrx';
 
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import * as RouterActions from './../../../core/@ngrx/router/router.actions';
 
 import { TaskModel, Task  } from './../../models/task.model';
 import * as TasksActions from './../../../core/@ngrx/tasks/tasks.actions';
@@ -22,7 +22,6 @@ export class TaskListComponent implements OnInit {
   
 
   constructor(
-    private router: Router,
     private store: Store<AppState>
   ) {}
 
@@ -35,8 +34,9 @@ export class TaskListComponent implements OnInit {
   }
 
   onCreateTask() {
-    const link = ['/add'];
-    this.router.navigate(link);
+    this.store.dispatch(RouterActions.go({
+      path: ['/add']
+    }));
   }
 
   onCompleteTask(task: TaskModel): void {
@@ -49,7 +49,10 @@ export class TaskListComponent implements OnInit {
 
   onEditTask(task: TaskModel): void {
     const link = ['/edit', task.id];
-    this.router.navigate(link);
+    this.store.dispatch(RouterActions.go({
+      path: link
+    }));
+
   }
 
   onDeleteTask(task: TaskModel) {

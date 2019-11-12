@@ -6,17 +6,16 @@ import * as TasksActions from './tasks.actions';
 
 // rxjs
 import { Observable } from 'rxjs';
-import { Router } from '@angular/router';
 import { concatMap, map, pluck, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { TaskModel, Task } from '../../../tasks/models/task.model';
 
+import * as RouterActions from './../router/router.actions'
 
 import { TaskPromiseService } from './../../../tasks/services';
 
 @Injectable()
 export class TasksEffects implements OnInitEffects, OnRunEffects {
   constructor(private actions$: Actions,
-    private router: Router,
     private taskPromiseService: TaskPromiseService) {
     console.log('[TASKS EFFECTS]');
   }
@@ -73,7 +72,6 @@ updateTask$: Observable<Action> = createEffect(() =>
         this.taskPromiseService
           .updateTask(task)
           .then((updatedTask: Task) => {
-            this.router.navigate(['/home']);
             return TasksActions.updateTaskSuccess({ task: updatedTask });
           })
           .catch(error => TasksActions.updateTaskError({ error }))

@@ -1,3 +1,8 @@
+// @Ngrx
+import { Store } from '@ngrx/store';
+import { AppState } from './../../../core/@ngrx';
+import * as RouterActions from './../../../core/@ngrx/router/router.actions';
+
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessagesService } from '../../../core';
@@ -12,13 +17,16 @@ export class MessagesComponent implements OnInit {
 
   constructor(
     public messagesService: MessagesService,
-    private router: Router
+    private store: Store<AppState>
   ) {}
 
   ngOnInit() {}
 
   onClose() {
-    this.router.navigate([{ outlets: { messages: null } }]);
+    this.store.dispatch(RouterActions.go({
+      path: [{ outlets: { messages: null } }]
+    }));
+
     this.messagesService.isDisplayed = false;
   }
 

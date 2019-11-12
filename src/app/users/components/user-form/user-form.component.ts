@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, UrlTree } from '@angular/router';
-import { Location } from '@angular/common';
+import * as RouterActions from './../../../core/@ngrx/router/router.actions';
 
 // rxjs
 import { Observable, of } from 'rxjs';
@@ -28,7 +28,6 @@ export class UserFormComponent implements OnInit, CanComponentDeactivate {
 
   constructor(
     private route: ActivatedRoute,
-    private location: Location,
     private dialogService: DialogService,
     private store: Store<AppState>
   ) {}
@@ -51,7 +50,7 @@ export class UserFormComponent implements OnInit, CanComponentDeactivate {
   }
 
   onGoBack() {
-    this.location.back();
+    this.store.dispatch(RouterActions.back());
   }
 
   canDeactivate():
